@@ -66,49 +66,56 @@ fun MainApp() {
         },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Dashboard.route
-            ) {
-                composable(Screen.Dashboard.route) {
-                    DashboardScreen(
-                        uiState = uiState,
-                        onTaskToggle = { viewModel.toggleTaskCompletion(it) },
-                        onAddTaskClick = { viewModel.showAddDialog() },
-                        onNavigateToTasks = { navController.navigate(Screen.Tasks.route) }
-                    )
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Dashboard.route
+                ) {
+                    composable(Screen.Dashboard.route) {
+                        DashboardScreen(
+                            uiState = uiState,
+                            onTaskToggle = { viewModel.toggleTaskCompletion(it) },
+                            onAddTaskClick = { viewModel.showAddDialog() },
+                            onNavigateToTasks = { navController.navigate(Screen.Tasks.route) }
+                        )
+                    }
+                    composable(Screen.Tasks.route) {
+                        TaskListScreen(
+                            uiState = uiState,
+                            onSearchQueryChange = { viewModel.setSearchQuery(it) },
+                            onCategorySelected = { viewModel.setSelectedCategory(it) },
+                            onToggleTask = { viewModel.toggleTaskCompletion(it) },
+                            onEditTask = { viewModel.showEditDialog(it) },
+                            onDeleteTask = { viewModel.deleteTask(it) }
+                        )
+                    }
+                    composable(Screen.Calendar.route) {
+                        CalendarScreen(
+                            uiState = uiState,
+                            onToggleTask = { viewModel.toggleTaskCompletion(it) }
+                        )
+                    }
+                    composable(Screen.Statistics.route) {
+                        StatisticsScreen(uiState = uiState)
+                    }
+                    composable(Screen.Reminders.route) {
+                        RemindersScreen(uiState = uiState)
+                    }
                 }
-                composable(Screen.Tasks.route) {
-                    TaskListScreen(
-                        uiState = uiState,
-                        onSearchQueryChange = { viewModel.setSearchQuery(it) },
-                        onCategorySelected = { viewModel.setSelectedCategory(it) },
-                        onToggleTask = { viewModel.toggleTaskCompletion(it) },
-                        onEditTask = { viewModel.showEditDialog(it) },
-                        onDeleteTask = { viewModel.deleteTask(it) }
-                    )
-                }
-                composable(Screen.Calendar.route) {
-                    CalendarScreen(
-                        uiState = uiState,
-                        onToggleTask = { viewModel.toggleTaskCompletion(it) }
-                    )
-                }
-                composable(Screen.Statistics.route) {
-                    StatisticsScreen(uiState = uiState)
-                }
-                composable(Screen.Reminders.route) {
-                    RemindersScreen(uiState = uiState)
-                }
-            }
 
-            if (uiState.isAddEditDialogVisible) {
-                AddEditTaskDialog(
-                    taskToEdit = uiState.currentEditingTask,
-                    onDismiss = { viewModel.hideAddEditDialog() },
-                    onSave = { task -> viewModel.saveTask(task) }
-                )
+                if (uiState.isAddEditDialogVisible) {
+                    AddEditTaskDialog(
+                        taskToEdit = uiState.currentEditingTask,
+                        onDismiss = { viewModel.hideAddEditDialog() },
+                        onSave = { task -> viewModel.saveTask(task) }
+                    )
+                }
             }
         }
     }
