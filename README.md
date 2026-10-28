@@ -1,3 +1,7 @@
+Cần chỉnh sửa:
+Chuông thông báo
+chỉnh sửa công việc
+danh sách hoàn thành và chưa hoàn thành
 # 📱 Ứng Dụng Quản Lý Công Việc Hằng Ngày (Daily Task Manager)
 
 Ứng dụng di động quản lý công việc hằng ngày giúp người dùng lập kế hoạch, theo dõi tiến độ công việc và phân tích hiệu suất cá nhân. Được phát triển bằng **Jetpack Compose** và **Material 3** theo kiến trúc hiện đại của Android.
