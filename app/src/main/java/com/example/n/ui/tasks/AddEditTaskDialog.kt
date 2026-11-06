@@ -15,6 +15,7 @@ import com.example.n.data.Task
 import com.example.n.data.TaskCategory
 import com.example.n.data.TaskPriority
 import java.time.LocalDate
+import java.time.LocalTime
 
 data class TaskPreset(val title: String, val category: TaskCategory, val priority: TaskPriority)
 
@@ -30,6 +31,7 @@ fun AddEditTaskDialog(
     var category by remember { mutableStateOf(taskToEdit?.category ?: TaskCategory.WORK) }
     var priority by remember { mutableStateOf(taskToEdit?.priority ?: TaskPriority.MEDIUM) }
     var dueDateStr by remember { mutableStateOf(taskToEdit?.dueDate?.toString() ?: LocalDate.now().toString()) }
+    var dueTimeStr by remember { mutableStateOf(taskToEdit?.dueTime?.toString() ?: "09:00") }
     var reminderEnabled by remember { mutableStateOf(taskToEdit?.reminderEnabled ?: true) }
     var showError by remember { mutableStateOf(false) }
 
@@ -44,6 +46,8 @@ fun AddEditTaskDialog(
         TaskPreset("Thanh toán hóa đơn", TaskCategory.FINANCE, TaskPriority.HIGH)
     )
 
+    val timePresets = listOf("08:00", "10:00", "14:00", "17:30", "20:00")
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (taskToEdit == null) "Thêm công việc mới" else "Chỉnh sửa công việc") },
@@ -57,7 +61,7 @@ fun AddEditTaskDialog(
             ) {
                 // Quick Presets
                 if (taskToEdit == null) {
-                    Text("Gợi ý chọn nhanh:", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                    Text("Gợi ý chọn nhanh mẫu công việc:", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(presets) { preset ->
                             SuggestionChip(
@@ -104,7 +108,7 @@ fun AddEditTaskDialog(
                         value = category.displayName,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Danh mục") },
+                        label = { Text("Danh mục phân loại") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
@@ -157,20 +161,42 @@ fun AddEditTaskDialog(
                     }
                 }
 
+                // Due Date
                 OutlinedTextField(
                     value = dueDateStr,
                     onValueChange = { dueDateStr = it },
-                    label = { Text("Ngày hạn (YYYY-MM-DD)") },
+                    label = { Text("Ngày hết hạn (YYYY-MM-DD)") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
+
+                // Due Time + Quick Time Selection
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    OutlinedTextField(
+                        value = dueTimeStr,
+                        onValueChange = { dueTimeStr = it },
+                        label = { Text("Giờ hết hạn (HH:mm)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Text("Chọn giờ nhanh:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        items(timePresets) { time ->
+                            FilterChip(
+                                selected = dueTimeStr == time,
+                                onClick = { dueTimeStr = time },
+                                label = { Text(time) }
+                            )
+                        }
+                    }
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Bật nhắc nhở thông báo")
+                    Text("Bật nhắc nhở thông báo", fontWeight = FontWeight.Medium)
                     Switch(
                         checked = reminderEnabled,
                         onCheckedChange = { reminderEnabled = it }
@@ -187,12 +213,18 @@ fun AddEditTaskDialog(
                         } catch (_: Exception) {
                             LocalDate.now()
                         }
+                        val parsedTime = try {
+                            LocalTime.parse(dueTimeStr)
+                        } catch (_: Exception) {
+                            LocalTime.of(9, 0)
+                        }
                         val newTask = taskToEdit?.copy(
                             title = title,
                             description = description,
                             category = category,
                             priority = priority,
                             dueDate = parsedDate,
+                            dueTime = parsedTime,
                             reminderEnabled = reminderEnabled
                         ) ?: Task(
                             title = title,
@@ -200,6 +232,7 @@ fun AddEditTaskDialog(
                             category = category,
                             priority = priority,
                             dueDate = parsedDate,
+                            dueTime = parsedTime,
                             reminderEnabled = reminderEnabled
                         )
                         onSave(newTask)

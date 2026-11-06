@@ -202,7 +202,7 @@ fun TaskCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Badge { Text(task.category.displayName) }
                     Badge { Text("Ưu tiên: ${task.priority.displayName}") }
-                    Badge { Text("Hạn: ${task.dueDate}") }
+                    Badge { Text("Hạn: ${task.dueDate} lúc ${task.dueTime}") }
                 }
             }
 

@@ -2,11 +2,12 @@ package com.example.n.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val AppColorScheme = lightColorScheme(
+private val LightColorScheme = lightColorScheme(
     primary = Color(0xFF1565C0),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFD0E4FF),
@@ -39,13 +40,48 @@ private val AppColorScheme = lightColorScheme(
     outline = Color(0xFF74777F)
 )
 
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF90CAF9),
+    onPrimary = Color(0xFF003258),
+    primaryContainer = Color(0xFF004881),
+    onPrimaryContainer = Color(0xFFD0E4FF),
+
+    secondary = Color(0xFF81D4FA),
+    onSecondary = Color(0xFF003547),
+    secondaryContainer = Color(0xFF004D65),
+    onSecondaryContainer = Color(0xFFE0F7FA),
+
+    tertiary = Color(0xFFA5D6A7),
+    onTertiary = Color(0xFF00390A),
+    tertiaryContainer = Color(0xFF005313),
+    onTertiaryContainer = Color(0xFFE8F5E9),
+
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
+
+    background = Color(0xFF121212),
+    onBackground = Color(0xFFE1E2E5),
+
+    surface = Color(0xFF1E1E1E),
+    onSurface = Color(0xFFE1E2E5),
+
+    surfaceVariant = Color(0xFF2C2C2C),
+    onSurfaceVariant = Color(0xFFC4C6CF),
+
+    outline = Color(0xFF8E9099)
+)
+
 @Composable
 fun ĐồÁnTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+
     MaterialTheme(
-        colorScheme = AppColorScheme,
+        colorScheme = colorScheme,
         typography = Typography,
         content = content
     )
