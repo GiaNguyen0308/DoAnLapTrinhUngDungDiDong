@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -19,6 +19,12 @@ import androidx.compose.ui.unit.dp
 import com.example.n.data.Task
 import com.example.n.data.TaskCategory
 import com.example.n.ui.viewmodel.TaskUiState
+
+enum class TaskStatusFilter(val displayName: String) {
+    ALL("Tất cả"),
+    PENDING("Chưa hoàn thành"),
+    COMPLETED("Đã hoàn thành")
+}
 
 @Composable
 fun TaskListScreen(
@@ -29,11 +35,18 @@ fun TaskListScreen(
     onEditTask: (Task) -> Unit,
     onDeleteTask: (String) -> Unit
 ) {
+    var selectedStatusFilter by remember { mutableStateOf(TaskStatusFilter.ALL) }
+
     val filteredTasks = uiState.tasks.filter { task ->
         val matchesSearch = task.title.contains(uiState.searchQuery, ignoreCase = true) ||
                 task.description.contains(uiState.searchQuery, ignoreCase = true)
         val matchesCategory = (uiState.selectedCategory == null) || (task.category == uiState.selectedCategory)
-        matchesSearch && matchesCategory
+        val matchesStatus = when (selectedStatusFilter) {
+            TaskStatusFilter.ALL -> true
+            TaskStatusFilter.PENDING -> !task.isCompleted
+            TaskStatusFilter.COMPLETED -> task.isCompleted
+        }
+        matchesSearch && matchesCategory && matchesStatus
     }
 
     Column(
@@ -53,6 +66,17 @@ fun TaskListScreen(
             singleLine = true
         )
 
+        // Status Filter Tabs (Tất cả | Chưa hoàn thành | Đã hoàn thành)
+        TabRow(selectedTabIndex = selectedStatusFilter.ordinal) {
+            TaskStatusFilter.entries.forEach { status ->
+                Tab(
+                    selected = selectedStatusFilter == status,
+                    onClick = { selectedStatusFilter = status },
+                    text = { Text(status.displayName, fontWeight = FontWeight.Medium) }
+                )
+            }
+        }
+
         // Category Filter Chips
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -62,7 +86,7 @@ fun TaskListScreen(
                 FilterChip(
                     selected = uiState.selectedCategory == null,
                     onClick = { onCategorySelected(null) },
-                    label = { Text("Tất cả") }
+                    label = { Text("Tất cả danh mục") }
                 )
             }
             items(TaskCategory.entries) { category ->
@@ -156,12 +180,20 @@ fun TaskCard(
                 }
             }
 
-            Column {
+            Row {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Sửa", tint = MaterialTheme.colorScheme.primary)
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Sửa công việc",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Xóa", tint = MaterialTheme.colorScheme.error)
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Xóa công việc",
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
