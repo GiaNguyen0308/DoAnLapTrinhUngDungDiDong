@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.n.data.Task
 import com.example.n.data.TaskCategory
 import com.example.n.data.TaskPriority
+import com.example.n.data.TaskRepeatMode
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -30,6 +31,7 @@ fun AddEditTaskDialog(
     var description by remember { mutableStateOf(taskToEdit?.description ?: "") }
     var category by remember { mutableStateOf(taskToEdit?.category ?: TaskCategory.WORK) }
     var priority by remember { mutableStateOf(taskToEdit?.priority ?: TaskPriority.MEDIUM) }
+    var repeatMode by remember { mutableStateOf(taskToEdit?.repeatMode ?: TaskRepeatMode.ONCE) }
     var dueDateStr by remember { mutableStateOf(taskToEdit?.dueDate?.toString() ?: LocalDate.now().toString()) }
     var dueTimeStr by remember { mutableStateOf(taskToEdit?.dueTime?.toString() ?: "09:00") }
     var reminderEnabled by remember { mutableStateOf(taskToEdit?.reminderEnabled ?: true) }
@@ -37,6 +39,7 @@ fun AddEditTaskDialog(
 
     var categoryExpanded by remember { mutableStateOf(false) }
     var priorityExpanded by remember { mutableStateOf(false) }
+    var repeatModeExpanded by remember { mutableStateOf(false) }
 
     val presets = listOf(
         TaskPreset("Họp nhóm tiến độ", TaskCategory.WORK, TaskPriority.HIGH),
@@ -161,6 +164,37 @@ fun AddEditTaskDialog(
                     }
                 }
 
+                // Repeat Mode Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = repeatModeExpanded,
+                    onExpandedChange = { repeatModeExpanded = !repeatModeExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = repeatMode.displayName,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Chế độ lặp lại") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = repeatModeExpanded) }
+                    )
+                    ExposedDropdownMenu(
+                        expanded = repeatModeExpanded,
+                        onDismissRequest = { repeatModeExpanded = false }
+                    ) {
+                        TaskRepeatMode.entries.forEach { mode ->
+                            DropdownMenuItem(
+                                text = { Text(mode.displayName) },
+                                onClick = {
+                                    repeatMode = mode
+                                    repeatModeExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 // Due Date
                 OutlinedTextField(
                     value = dueDateStr,
@@ -223,6 +257,7 @@ fun AddEditTaskDialog(
                             description = description,
                             category = category,
                             priority = priority,
+                            repeatMode = repeatMode,
                             dueDate = parsedDate,
                             dueTime = parsedTime,
                             reminderEnabled = reminderEnabled
@@ -231,6 +266,7 @@ fun AddEditTaskDialog(
                             description = description,
                             category = category,
                             priority = priority,
+                            repeatMode = repeatMode,
                             dueDate = parsedDate,
                             dueTime = parsedTime,
                             reminderEnabled = reminderEnabled

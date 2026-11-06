@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.n.data.Task
 import com.example.n.data.TaskPriority
+import com.example.n.data.TaskRepeatMode
 
 @Composable
 fun TaskChip(
@@ -59,6 +60,13 @@ fun TaskTagInfo(task: Task) {
                     TaskPriority.LOW -> MaterialTheme.colorScheme.onTertiaryContainer
                 }
             )
+            if (task.repeatMode != TaskRepeatMode.ONCE) {
+                TaskChip(
+                    text = "🔄 ${task.repeatMode.displayName}",
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
         }
         TaskChip(
             text = "⏰ Hạn: ${task.dueDate} lúc ${task.dueTime}",

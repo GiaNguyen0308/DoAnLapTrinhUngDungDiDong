@@ -60,7 +60,24 @@ object TaskRepository {
 
     fun toggleTaskCompletion(context: Context, taskId: String) {
         _tasks.update { list ->
-            list.map { if (it.id == taskId) it.copy(isCompleted = !it.isCompleted) else it }
+            list.map { task ->
+                if (task.id == taskId) {
+                    val nextCompletionState = !task.isCompleted
+                    if (nextCompletionState && task.repeatMode != TaskRepeatMode.ONCE) {
+                        val nextDueDate = when (task.repeatMode) {
+                            TaskRepeatMode.DAILY -> task.dueDate.plusDays(1)
+                            TaskRepeatMode.WEEKLY -> task.dueDate.plusWeeks(1)
+                            TaskRepeatMode.MONTHLY -> task.dueDate.plusMonths(1)
+                            else -> task.dueDate
+                        }
+                        task.copy(dueDate = nextDueDate, isCompleted = false)
+                    } else {
+                        task.copy(isCompleted = nextCompletionState)
+                    }
+                } else {
+                    task
+                }
+            }
         }
         persistTasks(context)
     }

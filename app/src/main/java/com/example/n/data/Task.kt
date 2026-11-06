@@ -13,7 +13,8 @@ data class Task(
     val dueDate: LocalDate = LocalDate.now(),
     val dueTime: LocalTime = LocalTime.of(9, 0),
     val isCompleted: Boolean = false,
-    val reminderEnabled: Boolean = true
+    val reminderEnabled: Boolean = true,
+    val repeatMode: TaskRepeatMode = TaskRepeatMode.ONCE
 ) {
     fun toJson(): JSONObject {
         val json = JSONObject()
@@ -26,6 +27,7 @@ data class Task(
         json.put("dueTime", dueTime.toString())
         json.put("isCompleted", isCompleted)
         json.put("reminderEnabled", reminderEnabled)
+        json.put("repeatMode", repeatMode.name)
         return json
     }
 
@@ -40,10 +42,18 @@ data class Task(
                 dueDate = try { LocalDate.parse(json.optString("dueDate", LocalDate.now().toString())) } catch (_: Exception) { LocalDate.now() },
                 dueTime = try { LocalTime.parse(json.optString("dueTime", "09:00")) } catch (_: Exception) { LocalTime.of(9, 0) },
                 isCompleted = json.optBoolean("isCompleted", false),
-                reminderEnabled = json.optBoolean("reminderEnabled", true)
+                reminderEnabled = json.optBoolean("reminderEnabled", true),
+                repeatMode = try { TaskRepeatMode.valueOf(json.optString("repeatMode", "ONCE")) } catch (_: Exception) { TaskRepeatMode.ONCE }
             )
         }
     }
+}
+
+enum class TaskRepeatMode(val displayName: String) {
+    ONCE("Chỉ một lần"),
+    DAILY("Lặp lại hằng ngày"),
+    WEEKLY("Lặp lại hằng tuần"),
+    MONTHLY("Lặp lại hằng tháng")
 }
 
 enum class TaskCategory(val displayName: String) {
