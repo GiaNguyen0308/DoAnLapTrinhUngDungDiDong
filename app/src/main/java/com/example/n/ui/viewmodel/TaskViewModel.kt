@@ -1,5 +1,6 @@
 package com.example.n.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.n.data.Task
@@ -16,7 +17,8 @@ data class TaskUiState(
     val searchQuery: String = "",
     val selectedCategory: TaskCategory? = null,
     val isAddEditDialogVisible: Boolean = false,
-    val currentEditingTask: Task? = null
+    val currentEditingTask: Task? = null,
+    val isDarkTheme: Boolean = false
 )
 
 class TaskViewModel : ViewModel() {
@@ -29,6 +31,14 @@ class TaskViewModel : ViewModel() {
                 _uiState.update { it.copy(tasks = allTasks) }
             }
         }
+    }
+
+    fun initRepository(context: Context) {
+        TaskRepository.initRepository(context)
+    }
+
+    fun toggleTheme() {
+        _uiState.update { it.copy(isDarkTheme = !it.isDarkTheme) }
     }
 
     fun setSearchQuery(query: String) {
@@ -51,20 +61,20 @@ class TaskViewModel : ViewModel() {
         _uiState.update { it.copy(isAddEditDialogVisible = false, currentEditingTask = null) }
     }
 
-    fun saveTask(task: Task) {
+    fun saveTask(context: Context, task: Task) {
         if (_uiState.value.currentEditingTask == null) {
-            TaskRepository.addTask(task)
+            TaskRepository.addTask(context, task)
         } else {
-            TaskRepository.updateTask(task)
+            TaskRepository.updateTask(context, task)
         }
         hideAddEditDialog()
     }
 
-    fun deleteTask(taskId: String) {
-        TaskRepository.deleteTask(taskId)
+    fun deleteTask(context: Context, taskId: String) {
+        TaskRepository.deleteTask(context, taskId)
     }
 
-    fun toggleTaskCompletion(taskId: String) {
-        TaskRepository.toggleTaskCompletion(taskId)
+    fun toggleTaskCompletion(context: Context, taskId: String) {
+        TaskRepository.toggleTaskCompletion(context, taskId)
     }
 }

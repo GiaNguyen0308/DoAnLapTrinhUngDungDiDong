@@ -1,31 +1,67 @@
 package com.example.n.data
 
+import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.json.JSONArray
 
 object TaskRepository {
+    private const val PREFS_NAME = "task_manager_prefs"
+    private const val KEY_TASKS_JSON = "key_tasks_json"
+
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks.asStateFlow()
 
-    fun addTask(task: Task) {
-        _tasks.update { listOf(task) + it }
+    fun initRepository(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val jsonString = prefs.getString(KEY_TASKS_JSON, null)
+        if (!jsonString.isNullOrBlank()) {
+            try {
+                val jsonArray = JSONArray(jsonString)
+                val loadedTasks = mutableListOf<Task>()
+                for (i in 0 until jsonArray.length()) {
+                    val jsonObj = jsonArray.getJSONObject(i)
+                    loadedTasks.add(Task.fromJson(jsonObj))
+                }
+                _tasks.value = loadedTasks
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
-    fun updateTask(updatedTask: Task) {
+    private fun persistTasks(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val jsonArray = JSONArray()
+        _tasks.value.forEach { task ->
+            jsonArray.put(task.toJson())
+        }
+        prefs.edit().putString(KEY_TASKS_JSON, jsonArray.toString()).apply()
+    }
+
+    fun addTask(context: Context, task: Task) {
+        _tasks.update { listOf(task) + it }
+        persistTasks(context)
+    }
+
+    fun updateTask(context: Context, updatedTask: Task) {
         _tasks.update { list ->
             list.map { if (it.id == updatedTask.id) updatedTask else it }
         }
+        persistTasks(context)
     }
 
-    fun deleteTask(taskId: String) {
+    fun deleteTask(context: Context, taskId: String) {
         _tasks.update { list -> list.filter { it.id != taskId } }
+        persistTasks(context)
     }
 
-    fun toggleTaskCompletion(taskId: String) {
+    fun toggleTaskCompletion(context: Context, taskId: String) {
         _tasks.update { list ->
             list.map { if (it.id == taskId) it.copy(isCompleted = !it.isCompleted) else it }
         }
+        persistTasks(context)
     }
 }

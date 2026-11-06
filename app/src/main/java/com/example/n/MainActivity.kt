@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,8 +35,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ĐồÁnTheme {
-                MainApp()
+            val viewModel: TaskViewModel = viewModel()
+            val uiState by viewModel.uiState.collectAsState()
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                viewModel.initRepository(context)
+            }
+
+            ĐồÁnTheme(darkTheme = uiState.isDarkTheme) {
+                MainApp(viewModel = viewModel, uiState = uiState)
             }
         }
     }
@@ -41,15 +52,25 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainApp() {
+fun MainApp(
+    viewModel: TaskViewModel,
+    uiState: com.example.n.ui.viewmodel.TaskUiState
+) {
     val navController = rememberNavController()
-    val viewModel: TaskViewModel = viewModel()
-    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Quản Lý Công Việc Hằng Ngày") },
+                actions = {
+                    IconButton(onClick = { viewModel.toggleTheme() }) {
+                        Icon(
+                            imageVector = if (uiState.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "Chuyển giao diện Sáng/Tối"
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -80,7 +101,7 @@ fun MainApp() {
                     composable(Screen.Dashboard.route) {
                         DashboardScreen(
                             uiState = uiState,
-                            onTaskToggle = { viewModel.toggleTaskCompletion(it) },
+                            onTaskToggle = { viewModel.toggleTaskCompletion(context, it) },
                             onAddTaskClick = { viewModel.showAddDialog() },
                             onNavigateToTasks = { navController.navigate(Screen.Tasks.route) }
                         )
@@ -90,15 +111,15 @@ fun MainApp() {
                             uiState = uiState,
                             onSearchQueryChange = { viewModel.setSearchQuery(it) },
                             onCategorySelected = { viewModel.setSelectedCategory(it) },
-                            onToggleTask = { viewModel.toggleTaskCompletion(it) },
+                            onToggleTask = { viewModel.toggleTaskCompletion(context, it) },
                             onEditTask = { viewModel.showEditDialog(it) },
-                            onDeleteTask = { viewModel.deleteTask(it) }
+                            onDeleteTask = { viewModel.deleteTask(context, it) }
                         )
                     }
                     composable(Screen.Calendar.route) {
                         CalendarScreen(
                             uiState = uiState,
-                            onToggleTask = { viewModel.toggleTaskCompletion(it) }
+                            onToggleTask = { viewModel.toggleTaskCompletion(context, it) }
                         )
                     }
                     composable(Screen.Statistics.route) {
@@ -113,7 +134,7 @@ fun MainApp() {
                     AddEditTaskDialog(
                         taskToEdit = uiState.currentEditingTask,
                         onDismiss = { viewModel.hideAddEditDialog() },
-                        onSave = { task -> viewModel.saveTask(task) }
+                        onSave = { task -> viewModel.saveTask(context, task) }
                     )
                 }
             }
