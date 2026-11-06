@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.n.data.TaskRepository
 import com.example.n.ui.calendar.CalendarScreen
 import com.example.n.ui.components.BottomNavBar
 import com.example.n.ui.dashboard.DashboardScreen
@@ -34,14 +35,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        TaskRepository.initRepository(applicationContext)
         setContent {
             val viewModel: TaskViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsState()
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                viewModel.initRepository(context)
-            }
 
             ĐồÁnTheme(darkTheme = uiState.isDarkTheme) {
                 MainApp(viewModel = viewModel, uiState = uiState)
