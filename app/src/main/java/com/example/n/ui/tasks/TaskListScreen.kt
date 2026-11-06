@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.n.data.Task
 import com.example.n.data.TaskCategory
+import com.example.n.ui.components.TaskTagInfo
 import com.example.n.ui.viewmodel.TaskUiState
 
 enum class TaskStatusFilter(val displayName: String) {
@@ -198,12 +199,8 @@ fun TaskCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Badge { Text(task.category.displayName) }
-                    Badge { Text("Ưu tiên: ${task.priority.displayName}") }
-                    Badge { Text("Hạn: ${task.dueDate} lúc ${task.dueTime}") }
-                }
+                Spacer(modifier = Modifier.height(6.dp))
+                TaskTagInfo(task = task)
             }
 
             Row {

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.n.data.Task
+import com.example.n.ui.components.TaskTagInfo
 import com.example.n.ui.viewmodel.TaskUiState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -137,11 +138,8 @@ fun CalendarTaskItem(task: Task, onToggle: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Badge { Text(task.category.displayName) }
-                    Badge { Text(task.priority.displayName) }
-                }
+                Spacer(modifier = Modifier.height(6.dp))
+                TaskTagInfo(task = task)
             }
             Checkbox(
                 checked = task.isCompleted,
