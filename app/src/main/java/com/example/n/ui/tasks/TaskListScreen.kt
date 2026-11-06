@@ -36,6 +36,7 @@ fun TaskListScreen(
     onDeleteTask: (String) -> Unit
 ) {
     var selectedStatusFilter by remember { mutableStateOf(TaskStatusFilter.ALL) }
+    var taskToDelete by remember { mutableStateOf<Task?>(null) }
 
     val filteredTasks = uiState.tasks.filter { task ->
         val matchesSearch = task.title.contains(uiState.searchQuery, ignoreCase = true) ||
@@ -124,10 +125,35 @@ fun TaskListScreen(
                         task = task,
                         onToggle = { onToggleTask(task.id) },
                         onEdit = { onEditTask(task) },
-                        onDelete = { onDeleteTask(task.id) }
+                        onDelete = { taskToDelete = task }
                     )
                 }
             }
+        }
+
+        // Confirmation Delete Dialog
+        taskToDelete?.let { task ->
+            AlertDialog(
+                onDismissRequest = { taskToDelete = null },
+                title = { Text("Xác nhận xóa công việc") },
+                text = { Text("Bạn có chắc chắn muốn xóa công việc \"${task.title}\" không?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onDeleteTask(task.id)
+                            taskToDelete = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Xóa")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { taskToDelete = null }) {
+                        Text("Hủy")
+                    }
+                }
+            )
         }
     }
 }
